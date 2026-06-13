@@ -1,16 +1,15 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import yfinance as yf
+import requests # <-- NUEVO
 
 app = Flask(__name__)
 CORS(app)
 
-# NUEVA RUTA: Esta es la que muestra tu página web
 @app.route('/')
 def home():
     return render_template('index.html')
 
-# Ruta de los cálculos (Se queda casi igual)
 @app.route('/calcular', methods=['POST'])
 def calcular():
     datos = request.json
@@ -26,29 +25,41 @@ def calcular():
     nombre_empresa = simbolo
     
     try:
-        ticker = yf.Ticker(simbolo)
+        # <-- INICIO DE LA SOLUCIÓN: Disfrazamos la conexión -->
+        session = requests.Session()
+        session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        })
+        
+        # Le pasamos la sesión "disfrazada" a yfinance
+        ticker = yf.Ticker(simbolo, session=session)
         historial = ticker.history(period=f"{anios_proyeccion}y")
         
-        if not historial.empty and len(historial) >= 2:
-            precio_actual = historial['Close'].iloc[-1]
-            precio_inicial = historial['Close'].iloc[0]
-            
-            dias_historia = (historial.index[-1] - historial.index[0]).days
-            anios_reales_analizados = dias_historia / 365.25
-            
-            if anios_reales_analizados > 0:
-                tasa_historica_anual = (precio_actual / precio_inicial) ** (1 / anios_reales_analizados) - 1
-            
-            info = ticker.info
-            nombre_empresa = info.get('shortName') or info.get('longName') or simbolo
-            tipo_activo = info.get('quoteType', 'Desconocido')
-            
-            if tipo_activo in ['ETF', 'MUTUALFUND']:
-                comision_anual = info.get('annualReportExpenseRatio') or info.get('expenseRatio') or 0.0
+        # Validación: Si Yahoo nos bloquea y devuelve vacío, lanzamos un error
+        if historial.empty or len(historial) < 2:
+            return jsonify({'error': 'Yahoo Finance bloqueó la conexión o no hay datos para este Ticker.'}), 400
+        # <-- FIN DE LA SOLUCIÓN -->
+
+        precio_actual = historial['Close'].iloc[-1]
+        precio_inicial = historial['Close'].iloc[0]
+        
+        dias_historia = (historial.index[-1] - historial.index[0]).days
+        anios_reales_analizados = dias_historia / 365.25
+        
+        if anios_reales_analizados > 0:
+            tasa_historica_anual = (precio_actual / precio_inicial) ** (1 / anios_reales_analizados) - 1
+        
+        info = ticker.info
+        nombre_empresa = info.get('shortName') or info.get('longName') or simbolo
+        tipo_activo = info.get('quoteType', 'Desconocido')
+        
+        if tipo_activo in ['ETF', 'MUTUALFUND']:
+            comision_anual = info.get('annualReportExpenseRatio') or info.get('expenseRatio') or 0.0
                 
     except Exception as e:
         return jsonify({'error': 'No se pudo obtener la información.'}), 400
         
+    # Matemáticas
     tasa_neta_anual = tasa_historica_anual - comision_anual
     tasa_neta_mensual = tasa_neta_anual / 12
     meses_futuros = anios_proyeccion * 12
