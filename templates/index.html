@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proyección de Inversiones</title>
+    <title>Proyección de Inversiones e Inflación</title>
     <style>
         :root { --primary: #2563eb; --background: #f8fafc; --card-bg: #ffffff; --text-main: #1e293b; --accent: #0f172a; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--background); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { background-color: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-width: 550px; width: 100%; }
+        .container { background-color: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%; }
         h1 { text-align: center; font-size: 1.6rem; color: var(--primary); margin-bottom: 10px; }
         
-        /* Estilos para la sección de introducción */
         .intro-box { background-color: #eff6ff; border-left: 4px solid var(--primary); padding: 15px; border-radius: 4px; margin-bottom: 25px; font-size: 0.9rem; color: #334155; line-height: 1.5; }
         .intro-box h4 { margin: 0 0 8px 0; color: var(--primary); }
         .intro-box ul { margin: 8px 0 0 0; padding-left: 20px; }
-        .intro-box li { margin-bottom: 5px; }
+        
+        .tickers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 0.85rem; }
+        .ticker-item { background: #e2e8f0; padding: 6px 10px; border-radius: 4px; display: flex; justify-content: space-between; }
+        .ticker-item strong { color: var(--primary); }
 
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        .optional-label { font-weight: normal; color: #64748b; font-size: 0.8rem; }
         input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
         button { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px; transition: background-color 0.2s; }
         button:hover { background-color: #1d4ed8; }
@@ -28,9 +31,9 @@
         .result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.95rem; }
         .total-row { font-size: 1.2rem; font-weight: bold; color: #059669; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0; }
         
-        /* Estilos para la nota legal */
-        .disclaimer { margin-top: 20px; padding: 12px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 0.8rem; color: #78350f; line-height: 1.4; text-align: justify; }
+        .longevity-box { background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 8px; margin-top: 15px; display: none; }
         
+        .disclaimer { margin-top: 20px; padding: 12px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 0.8rem; color: #78350f; line-height: 1.4; text-align: justify; }
         .loading { text-align: center; color: var(--primary); font-weight: bold; display: none; margin-top: 15px; }
         .error { color: #dc2626; text-align: center; margin-top: 15px; font-weight: bold; display: none; }
     </style>
@@ -41,15 +44,20 @@
     <h1>Simulador basado en Histórico</h1>
     
     <div class="intro-box">
-        <h4>¿Qué hace esta herramienta?</h4>
-        <p style="margin-top: 0;">Esta página proyecta el futuro de tu inversión utilizando datos reales del mercado bursátil. Calcula automáticamente la comisión del fondo y descuenta el 10% de ISR aplicable en México por enajenación de acciones.</p>
-        
-        <h4>Instrucciones de uso:</h4>
-        <ul>
-            <li>Ingresa el <strong>Ticker</strong> oficial (ej. VOO, SPY, AAPL).</li>
-            <li>Define tu capital inicial y cuánto aportarás cada mes.</li>
-            <li>Elige los <strong>Años</strong>: El sistema buscará cuál fue el rendimiento exacto en ese periodo hacia atrás, y usará ese mismo porcentaje para simular tus ganancias hacia el futuro.</li>
-        </ul>
+        <h4>Tickers Comunes de Ejemplo</h4>
+        <p style="margin: 0 0 10px 0; font-size: 0.85rem;">Puedes utilizar cualquier Ticker válido en el mercado global, pero aquí tienes los 10 más utilizados para que los uses como referencia:</p>
+        <div class="tickers-grid">
+            <div class="ticker-item"><strong>VOO</strong> Vanguard S&P 500</div>
+            <div class="ticker-item"><strong>IVV</strong> iShares Core S&P 500</div>
+            <div class="ticker-item"><strong>SPY</strong> SPDR S&P 500</div>
+            <div class="ticker-item"><strong>VT</strong> Vanguard Total World</div>
+            <div class="ticker-item"><strong>QQQ</strong> Invesco QQQ (Nasdaq)</div>
+            <div class="ticker-item"><strong>AAPL</strong> Apple Inc.</div>
+            <div class="ticker-item"><strong>MSFT</strong> Microsoft Corp.</div>
+            <div class="ticker-item"><strong>AMZN</strong> Amazon.com Inc.</div>
+            <div class="ticker-item"><strong>NVDA</strong> NVIDIA Corp.</div>
+            <div class="ticker-item"><strong>TSLA</strong> Tesla Inc.</div>
+        </div>
     </div>
     
     <div class="form-group">
@@ -72,21 +80,27 @@
         <input type="number" id="anios" value="10">
     </div>
 
+    <div class="form-group">
+        <label for="gastoAnual">
+            ¿Aproximadamente cuánto dinero gastas anualmente hoy? 
+            <span class="optional-label">(Opcional - Para calcular rendimiento contra inflación)</span>
+        </label>
+        <input type="number" id="gastoAnual" placeholder="Ej. 150000">
+    </div>
+
     <button onclick="enviarDatosAPython()">Analizar y Calcular</button>
     
-    <div id="mensajeCarga" class="loading">Consultando mercado en tiempo real...</div>
+    <div id="mensajeCarga" class="loading">Consultando mercado y calculando proyecciones...</div>
     <div id="mensajeError" class="error">Hubo un error al buscar el Ticker. Verifica que exista.</div>
 
     <div class="results" id="resultados">
         
         <div class="data-block">
-            <div class="data-title" id="tituloHistorico">Datos Históricos Extraídos</div>
-            
+            <div class="data-title">Datos Históricos Extraídos</div>
             <div class="result-row">
                 <span>Empresa / Fondo:</span>
                 <strong id="resNombre" style="color: var(--primary); text-align: right; max-width: 60%;"></strong>
             </div>
-            
             <div class="result-row">
                 <span style="display: flex; flex-direction: column;">
                     Rendimiento Anualizado
@@ -94,9 +108,8 @@
                 </span>
                 <strong id="resTasa" style="color: var(--primary);"></strong>
             </div>
-            
             <div class="result-row" style="font-size: 0.85rem; color: #64748b; margin-top: 10px;">
-                <span>Años de datos encontrados en la red:</span>
+                <span>Años de datos procesados:</span>
                 <span id="resAnios"></span>
             </div>
             <div class="result-row" style="font-size: 0.85rem; color: #64748b;">
@@ -125,8 +138,23 @@
             </div>
         </div>
 
+        <div class="longevity-box" id="cajaLongevidad">
+            <h4 style="margin: 0 0 10px 0; color: #166534;">Impacto de Inflación y Supervivencia</h4>
+            <div class="result-row">
+                <span>Tu gasto anual futuro estimado (4.5% inflación):</span>
+                <strong id="resGastoFuturo"></strong>
+            </div>
+            <div class="result-row" style="margin-top: 10px;">
+                <span>Al terminar la inversión, el total neto ahorrado te alcanzaría para mantener tu nivel de vida durante:</span>
+                <strong id="resSupervivencia" style="color: #166534; font-size: 1.1rem;"></strong>
+            </div>
+        </div>
+
         <div class="disclaimer">
-            <strong>Nota importante:</strong> Esta es solo una proyección basada en los valores estadísticos disponibles de la acción/fondo. No refleja la realidad ni constituye una recomendación de inversión. Esta proyección se realiza puramente con fines informativos y es imposible predecir con certeza cómo se comportará el valor de este instrumento en el futuro. Rendimientos pasados no garantizan rendimientos futuros.
+            <strong>Notas importantes y Limitaciones:</strong> 
+            <br>• Esta es solo una proyección estadística. No refleja realidades absolutas ni constituye una recomendación financiera. Rendimientos pasados no garantizan rendimientos futuros.
+            <br>• El cálculo de supervivencia asume una inflación constante del 4.5% anual y divide tu ahorro neto proyectado entre tu gasto anual futuro. No contempla rendimientos adicionales una vez finalizada la inversión (es decir, asume que gastarás el dinero de forma directa sin seguir invirtiéndolo).
+            <br>• Es imposible predecir con certeza cómo se comportará el mercado, las comisiones operativas o las políticas fiscales aplicables a tu caso particular en el futuro.
         </div>
 
     </div>
@@ -137,12 +165,14 @@
         document.getElementById('mensajeCarga').style.display = 'block';
         document.getElementById('resultados').style.display = 'none';
         document.getElementById('mensajeError').style.display = 'none';
+        document.getElementById('cajaLongevidad').style.display = 'none';
 
         const datos = {
             ticker: document.getElementById('ticker').value,
-            inversionInicial: document.getElementById('inversionInicial').value,
-            aportacionMensual: document.getElementById('aportacionMensual').value,
-            anios: document.getElementById('anios').value
+            inversionInicial: document.getElementById('inversionInicial').value || 0,
+            aportacionMensual: document.getElementById('aportacionMensual').value || 0,
+            anios: document.getElementById('anios').value || 10,
+            gastoAnual: document.getElementById('gastoAnual').value || 0
         };
 
         try {
@@ -163,18 +193,23 @@
 
             const formatoMoneda = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
             
-            // Llenar datos históricos
             document.getElementById('resNombre').innerText = resultado.nombre_empresa;
             document.getElementById('labelRendimiento').innerText = `(de los últimos ${datos.anios} años)`;
             document.getElementById('resTasa').innerText = `${(resultado.tasa_historica * 100).toFixed(2)}%`;
             document.getElementById('resAnios').innerText = resultado.anios_historicos_usados.toFixed(1);
             document.getElementById('resComision').innerText = `${(resultado.comision_anual * 100).toFixed(4)}%`;
             
-            // Llenar datos proyectados
             document.getElementById('resAportado').innerText = formatoMoneda.format(resultado.total_invertido);
             document.getElementById('resGanancia').innerText = formatoMoneda.format(resultado.ganancia_capital);
             document.getElementById('resImpuesto').innerText = formatoMoneda.format(resultado.impuesto_pagar);
             document.getElementById('resNeto').innerText = formatoMoneda.format(resultado.monto_total_ahorrado);
+
+            // Manejo dinámico de la caja de longevidad
+            if (datos.gastoAnual > 0) {
+                document.getElementById('resGastoFuturo').innerText = formatoMoneda.format(resultado.gasto_futuro);
+                document.getElementById('resSupervivencia').innerText = `${resultado.anios_supervivencia.toFixed(1)} años`;
+                document.getElementById('cajaLongevidad').style.display = 'block';
+            }
 
             document.getElementById('resultados').style.display = 'block';
         } catch (error) {
